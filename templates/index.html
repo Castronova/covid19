@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.legend rect {
+  fill:white;
+  stroke:black;
+  opacity:0.8;}
+
+</style>
+<body>
+
+    <h2> COVID-19 Deaths per State </h2>
+    <p> Specify the states that you want plotted as url query parameters, for example: <pre>localhost:8000/?states=new_york,new_jersey,massachusetts</pre> will display New York, New Jersey, and Massachusetts data.
+    </p>
+
+    <svg id='plot'></svg>
+
+    <div style='margin-left:25px;width:200px'>
+	<p style='font-weight:bold;font-size:12pt'>Select State(s)</p>
+        <select id='states-select' size=10 style="width:100%" multiple> </select>
+	</br>
+        <input type='submit' style='width:100%;margin-top:10px'>
+    </div>
+
+</body>
+
+{% block javascript %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v3.js"></script>
+
+<!--
+<script src="legend.js"></script>
+<script src="timeseries.js"></script>
+-->
+
+<script src="{{ url_for('static', filename='js/legend.js') }}"></script>
+<script src="{{ url_for('static', filename='js/timeseries.js') }}"></script>
+{% endblock %}
