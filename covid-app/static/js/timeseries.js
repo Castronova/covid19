@@ -9,11 +9,14 @@
 var dat;
 
 $(document).ready(function() {
-    // bind to the submit button
-    $('input').click(function () {
-        var selected = $('#states-select').val();
-        window.location = '/?states=' + selected.join();
-    })
+
+    $('input:checkbox').change(function(){
+	var selected = [];
+	$('input:checked').each(function() {
+	    selected.push($(this).attr('value'));
+	});
+	window.location = '/deaths?states=' + selected.join();
+        });
 });
 
 
@@ -32,6 +35,12 @@ var states = getParameterByName('states');
 if (states == null) {
     states = [];
 } else { states = states.split(",");}
+
+// check boxes for state parameters
+for (var i=0; i<states.length; i++) {
+    var elem = $('#'+states[i]);
+    elem.attr('Checked', 'Checked');
+}
 
 var margin = {top: 20, right: 80, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
@@ -81,7 +90,7 @@ function filter_selected(data) {
 
 }
 
-d3.tsv("/static/dat/covid-deaths.tsv", function(error, data) {
+d3.tsv("static/dat/covid-deaths.tsv", function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
 
   data.forEach(function(d) {
@@ -97,19 +106,6 @@ d3.tsv("/static/dat/covid-deaths.tsv", function(error, data) {
           })
         };
   });
-
-
-
-    // populate states select-box
-    var sel = document.getElementById('states-select');
-    for (var i=0; i < cities.length; i++) {
-        // create new option element
-        var state = cities[i].name;
-        var opt = document.createElement('option');
-        opt.appendChild( document.createTextNode(state) );
-        opt.value = state; 
-        sel.appendChild(opt);
-    }
 
     var filtered = filter_selected(cities);
     // filter to the states defined in the url

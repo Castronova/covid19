@@ -28,21 +28,50 @@ body {
   stroke:black;
   opacity:0.8;}
 
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+.newspaper {
+    -webkit-column-count: 6; /* Chrome, Safari, Opera */
+    -moz-column-count: 6; /* Firefox */
+    column-count: 6;
+}
 </style>
 <body>
 
-    <h2> COVID-19 Deaths per State </h2>
-    <p> Specify the states that you want plotted as url query parameters, for example: <pre>localhost:8000/?states=new_york,new_jersey,massachusetts</pre> will display New York, New Jersey, and Massachusetts data.
-    </p>
+    <div class='center'>
+        <h1> COVID-19 Deaths per State </h1>
+    </div>
 
     <svg id='plot'></svg>
 
+    <!-- 
     <div style='margin-left:25px;width:200px'>
 	<p style='font-weight:bold;font-size:12pt'>Select State(s)</p>
         <select id='states-select' size=10 style="width:100%" multiple> </select>
 	</br>
         <input type='submit' style='width:100%;margin-top:10px'>
     </div>
+    -->
+
+    <div class="newspaper">
+	{% for key, value in data.items() %}
+	    <span style="white-space: nowrap;">
+		<input type="checkbox"
+		       name={{key}}
+		       value={{value}}
+		       id={{value}} />
+		<label for={{key}}>
+		    {{key}}
+		</label>
+	    </span>
+	    <br/>
+	{% endfor %}
+
+
+</div>
 
 </body>
 
@@ -54,7 +83,11 @@ body {
 <script src="legend.js"></script>
 <script src="timeseries.js"></script>
 -->
-
+{% if prefix is not none %}
+<script src="{{ prefix }}/{{ url_for('static', filename='js/legend.js') }}"></script>
+<script src="{{prefix }}/{{ url_for('static', filename='js/timeseries.js') }}"></script>
+{% else %}
 <script src="{{ url_for('static', filename='js/legend.js') }}"></script>
 <script src="{{ url_for('static', filename='js/timeseries.js') }}"></script>
+{% endif %}
 {% endblock %}
