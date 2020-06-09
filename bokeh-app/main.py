@@ -88,8 +88,10 @@ def update_mode(attrname, old, new):
     if agg == 'cumulative':
         source.data = dict(x=dates, y=df[state])
     if agg == 'instantaneous':
+        diffs = df[state].diff()
+        diffs[diffs < 0] = 0
         source.data = dict(x=dates,
-                           y=df[state].diff())
+                           y=diffs)
 
 def update_agg(attrname, old, new):
     # create new dataframe from current x,y data
