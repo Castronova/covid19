@@ -32,8 +32,8 @@ state_select = Select(value=state,
 mode_select = Select(value='Cumulative',
                      title='Mode',
                      options=['Cumulative',
-                              'Instantaneous',
-                              'Rate of Change'])
+                              'Incremental',
+                              'Percent Change'])
 agg_select = Select(value='Cumulative',
                     title='Aggregation',
                     options=['Daily',
@@ -88,12 +88,20 @@ def update_mode(attrname, old, new):
     agg = new.lower()
     state = state_select.value
     if agg == 'cumulative':
+        # plot raw cumulative data
         source.data = dict(x=dates, y=df[state])
-    if agg == 'instantaneous':
+    if agg == 'incremental':
+        # compute incremental
         diffs = df[state].diff()
         diffs[diffs < 0] = 0
         source.data = dict(x=dates,
                            y=diffs)
+    if agg == 'percent change':
+        # compute percent change
+        pct = df[state].diff().pct_change()
+        pct = pct.fillna(0)
+        source.data = dict(x=dates,
+                           y=pct)
 
 def update_agg(attrname, old, new):
     # create new dataframe from current x,y data
