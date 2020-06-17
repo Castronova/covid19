@@ -6,7 +6,7 @@ from scipy.signal import savgol_filter
 
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, DataRange1d, Select
+from bokeh.models import ColumnDataSource, DataRange1d, Select, RadioButtonGroup
 from bokeh.palettes import Blues4
 from bokeh.plotting import figure
 
@@ -20,6 +20,7 @@ plot = figure(x_axis_type="datetime",
 plot.title.text = "Covid Deaths"
 
 
+#df = pd.read_csv('dat/covid-deaths.tsv',
 df = pd.read_csv('dat/covid-deaths.tsv',
                  delimiter='\t')
 
@@ -59,15 +60,16 @@ vbar.visible = False
 
 
 # fixed attributes
+plot_title = 'COVID Deceased: ' 
 plot.xaxis.axis_label = None
-plot.yaxis.axis_label = "Death Count"
+plot.yaxis.axis_label = "Count"
 plot.axis.axis_label_text_font_style = "bold"
 plot.x_range = DataRange1d(range_padding=0.0)
 plot.grid.grid_line_alpha = 0.3
 
 def update_plot(attrname, old, new):
     state = state_select.value
-    plot.title.text = f"COVID Deaths for {state}"
+    plot.title.text = f"{plot_title}{state}"
     source.data = dict(x=dates, y=df[state])
     update_style(None, None, style_select.value)
     update_mode(None, None, mode_select.value)
@@ -108,18 +110,36 @@ def update_agg(attrname, old, new):
 
     print('Update Agg not implemented')
 
+def update_data(attrname, old, new):
+    global df, plot_title
+    selected = data_select.labels[new]
+    if selected == 'Confirmed':
+        df = pd.read_csv('dat/covid-confirmed.tsv',
+                         delimiter='\t')
+        plot_title = 'COVID Confirmed: ' 
+    else:
+        df = pd.read_csv('dat/covid-deaths.tsv',
+                         delimiter='\t')
+        plot_title = 'COVID Deceased: ' 
+    update_plot('', '', '')
 
 #    src = get_dataset(df, cities[city]['airport'], distribution_select.value)
 #    source.data.update(src.data)
 
+data_select = RadioButtonGroup(labels=['Confirmed', 'Deceased'], active=1)
+
 state_select.on_change('value', update_plot)
 style_select.on_change('value', update_style)
 mode_select.on_change('value', update_mode)
-controls = column(state_select,
+data_select.on_change('active', update_data)
+
+controls = column(data_select,
+                  state_select,
                   mode_select,
                   style_select,
                   agg_select)
 curdoc().add_root(row(plot, controls))
-curdoc().title = "Covid Deaths"
 
+state = state_select.value
+plot.title.text = f"{plot_title}{state}"
 
