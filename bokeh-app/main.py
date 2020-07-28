@@ -10,17 +10,16 @@ from bokeh.models import ColumnDataSource, DataRange1d, Select, RadioButtonGroup
 from bokeh.palettes import Blues4
 from bokeh.plotting import figure
 
-mode = 'cumulative'
-style= 'line'
-agg = 'daily'
+from bokeh.models import HoverTool
+
+
+
+
 
 plot = figure(x_axis_type="datetime",
               plot_width=800,
-              tools="", toolbar_location=None)
+              toolbar_location='above')
 plot.title.text = "Covid Deaths"
-
-
-#df = pd.read_csv('dat/covid-deaths.tsv',
 df = pd.read_csv('dat/covid-deaths.tsv',
                  delimiter='\t')
 
@@ -43,8 +42,6 @@ style_select = Select(value='Line',
                         title='Style',
                         options=['Line',
                                  'Bar'])
-# percent per capita option? 
-
 
 dates = pd.to_datetime(df.date, format='%Y%m%d')
 source = ColumnDataSource(data=dict(x=dates,
@@ -54,8 +51,20 @@ line = plot.line('x', 'y',
                  source=source,
                  line_width=3,
                  line_alpha=0.6)
-vbar = plot.vbar(x='x', top='y', width=0.2,
+vbar = plot.vbar(x='x', top='y',
+                 width=0.2,
                  source=source)
+hover = (HoverTool(
+    renderers=[line, vbar],
+    tooltips=[
+        ('date', '@x{%F}'),
+        ('count', '@y'),
+    ],
+    formatters={
+        '@x': 'datetime',
+        },
+    ))
+plot.add_tools(hover)
 vbar.visible = False
 
 
@@ -66,6 +75,7 @@ plot.yaxis.axis_label = "Count"
 plot.axis.axis_label_text_font_style = "bold"
 plot.x_range = DataRange1d(range_padding=0.0)
 plot.grid.grid_line_alpha = 0.3
+plot.add_tools(hover)
 
 def update_plot(attrname, old, new):
     state = state_select.value
@@ -73,7 +83,7 @@ def update_plot(attrname, old, new):
     source.data = dict(x=dates, y=df[state])
     update_style(None, None, style_select.value)
     update_mode(None, None, mode_select.value)
-    update_agg(None, None, agg_select.value)
+#    update_agg(None, None, agg_select.value)
 
 def update_style(attrname, old, new):
     style = new.lower()
@@ -131,15 +141,13 @@ def update_data(attrname, old, new):
         plot_title = 'COVID Deceased: ' 
     update_plot('', '', '')
 
-#    src = get_dataset(df, cities[city]['airport'], distribution_select.value)
-#    source.data.update(src.data)
 
 data_select = RadioButtonGroup(labels=['Confirmed', 'Deceased'], active=1)
 
 state_select.on_change('value', update_plot)
-style_select.on_change('value', update_style)
-mode_select.on_change('value', update_mode)
-data_select.on_change('active', update_data)
+style_select.on_change('value', update_plot)
+mode_select.on_change('value', update_plot)
+data_select.on_change('active', update_plot)
 
 controls = column(data_select,
                   state_select,
