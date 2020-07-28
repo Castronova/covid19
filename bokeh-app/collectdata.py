@@ -14,7 +14,7 @@ def download_file(f):
     wget.download(f)
 
 
-def collect(outpath='.'):
+def collect(outpath='./dat'):
     # download the latest data
     baseUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series'
     deaths = 'time_series_covid19_deaths_US.csv'
@@ -46,6 +46,10 @@ def collect(outpath='.'):
         df.index.rename('date', inplace=True)
         df.index = pandas.to_datetime(df.index)
 
+        # create the output path if it doesn't already exist
+        if not os.path.exists(outpath):
+             os.makedirs(outpath)
+           
         # save to csv
         df.to_csv(f'{outpath}/covid-{fname.split("_")[-2]}.tsv', sep='\t',
                   date_format='%Y%m%d')
